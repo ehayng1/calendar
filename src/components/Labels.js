@@ -46,9 +46,9 @@ export default function Labels() {
 
   return (
     <React.Fragment>
-      <div className="flex-col">
-        <div className="">
-          <p className="text-gray-500 font-bold mt-10">Label</p>
+      <div className="flex mt-10">
+        <div className="flex-1">
+          <p className="text-gray-500 font-bold ">Label</p>
           {/* {labels.map(({ label: lbl, checked }, idx) => (
             <label key={idx} className="items-center mt-3 block">
               <input
@@ -83,8 +83,26 @@ export default function Labels() {
             </label>
           ))}
         </div>
-        <div style={{ position: "absolute", bottom: "2vh" }}>
+        {/* <div
+          style={{
+            position: "absolute",
+            bottom: "2vh",
+            left: "20vw",
+          }}
+        >
           <SurveyButton></SurveyButton>
+        </div> */}
+        <div className="flex flex-col">
+          <div className="flex-1">Edit</div>
+          <div
+            style={{
+              position: "absolute",
+              bottom: "2vh",
+              left: "20vw",
+            }}
+          >
+            <SurveyButton></SurveyButton>
+          </div>
         </div>
       </div>
     </React.Fragment>

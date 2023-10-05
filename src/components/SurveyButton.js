@@ -11,8 +11,9 @@ export default function SurveyButton() {
     <Box
       sx={{
         "& > :not(style)": { m: 1 },
-        marginLeft: 20,
-        marginTop: "auto",
+        // marginLeft: 20,
+        // marginTop: "auto",
+        // marginTop: "10vh",
       }}
     >
       <Fab size="medium" color="secondary" aria-label="edit">

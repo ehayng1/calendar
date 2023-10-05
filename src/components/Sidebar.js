@@ -5,7 +5,7 @@ import Labels from "./Labels";
 
 export default function Sidebar() {
   return (
-    <aside className="border p-5 w-64">
+    <aside className="border p-5 pb-0 w-64">
       <div className="flex">
         <CreateEventButton />
       </div>
