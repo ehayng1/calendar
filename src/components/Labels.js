@@ -3,6 +3,8 @@ import GlobalContext from "../context/GlobalContext";
 import SurveyButton from "./SurveyButton";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { height } from "@mui/system";
+import { getUserId } from "../utils/firebase";
 
 export default function Labels() {
   const {
@@ -14,19 +16,24 @@ export default function Labels() {
     updateLabelList,
   } = useContext(GlobalContext);
   const [serverLabels, setServerLabels] = useState([]);
+  const [labelNames, setLabelNames] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const labelsClasses = ["indigo", "gray", "green", "blue", "red", "purple"];
+  let userId;
 
-  const labelsClasses = [
-    "indigo",
-    "gray",
-    "green",
-    "blue",
-    "red",
-    "purple",
-  ];
+  //gets user id
+  // useEffect(() => {
+  //   async function init() {
+
+  //   }
+  //   init();
+  // }, []);
 
   useEffect(() => {
     const getLabels = async () => {
-      const docRef = doc(db, "label", "EyepSY8B48R8cqeWozZs(USER1)");
+      userId = await getUserId();
+      const docRef = doc(db, "label", userId);
+      // const docRef = doc(db, "label", "EyepSY8B48R8cqeWozZs(USER1)");
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -44,66 +51,93 @@ export default function Labels() {
     getLabels();
   }, [refresh]);
 
+  useEffect(() => {
+    const getLabelNames = async () => {
+      userId = await getUserId();
+      const docRef = doc(db, "labelNames", userId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        let data = docSnap.data();
+        setLabelNames(data);
+        // setServerLabels(filtered);
+      } else {
+        console.log("No such document!");
+      }
+    };
+    getLabelNames();
+  }, [refresh]);
+
+  function handleEdit() {
+    /// write here!
+    setEditMode(!editMode);
+  }
+
+  function handleSave() {
+    /// write here!
+    setEditMode(!editMode);
+  }
+
   return (
     <React.Fragment>
-      <div className="flex mt-10">
-        <div className="flex-1">
-          <p className="text-gray-500 font-bold ">Label</p>
-          {/* {labels.map(({ label: lbl, checked }, idx) => (
-            <label key={idx} className="items-center mt-3 block">
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={() =>
-                  updateLabel({ label: lbl, checked: !checked })
-                }
-                className={`form-checkbox h-5 w-5 text-${lbl}-400 rounded focus:ring-0 cursor-pointer`}
-              />
-              <span className="ml-2 text-gray-700 capitalize">
-                {lbl}
-              </span>
-            </label>
-          ))} */}
+      <div className=" mt-10 mb-5">
+        <div className="flex flex-col justify-start content-start flex-nowrap">
+          <div className="flex items-center">
+            <p className="text-gray-500 font-bold flex-1">Label</p>
+            <div
+              onClick={editMode ? handleSave : handleEdit}
+              className=" bg-blue-600 text-white p-1 px-3 rounded cursor-pointer"
+            >
+              {editMode ? "Save" : "Edit"}
+            </div>
+          </div>
+          {/* <div> */}
           {serverLabels.map((el, idx) => (
-            <label key={idx} className="items-center mt-3 block">
-              <input
-                type="checkbox"
-                checked={labelList[el]}
-                onChange={() => {
-                  let labels = { ...labelList };
-                  labels[el] = !labels[el];
-                  setLabelList(labels);
-                  console.log(labels);
-                }}
-                className={`form-checkbox h-5 w-5 text-${el}-400 rounded focus:ring-0 cursor-pointer`}
-              />
-              <span className="ml-2 text-gray-700 capitalize">
-                {el}
-              </span>
-            </label>
+            <>
+              <label key={idx} className="items-center mt-3 block">
+                <input
+                  type="checkbox"
+                  checked={labelList[el]}
+                  onChange={() => {
+                    let labels = { ...labelList };
+                    labels[el] = !labels[el];
+                    setLabelList(labels);
+                    console.log(labels);
+                  }}
+                  className={`form-checkbox h-5 w-5 text-${el}-400 rounded focus:ring-0 cursor-pointer`}
+                />
+                <span className="ml-2 text-gray-700 capitalize">
+                  {editMode ? (
+                    <input
+                      style={{
+                        width: "9vw",
+                        maxHeight: "3.4vh",
+                        border: "none",
+                      }}
+                      type="text"
+                      id="fname"
+                      name="fname"
+                      placeholder={labelNames[el]}
+                    ></input>
+                  ) : (
+                    labelNames[el]
+                  )}
+                </span>
+              </label>
+            </>
           ))}
-        </div>
-        {/* <div
-          style={{
-            position: "absolute",
-            bottom: "2vh",
-            left: "20vw",
-          }}
-        >
-          <SurveyButton></SurveyButton>
-        </div> */}
-        <div className="flex flex-col">
-          <div className="flex-1">Edit</div>
           <div
             style={{
               position: "absolute",
-              bottom: "2vh",
-              left: "20vw",
+              bottom: "0vh",
+              left: "13vw",
             }}
           >
-            <SurveyButton></SurveyButton>
+            {/* <SurveyButton></SurveyButton> */}
           </div>
+          {/* </div> */}
         </div>
+        {/* <div className="flex flex-col"></div> */}
       </div>
     </React.Fragment>
   );

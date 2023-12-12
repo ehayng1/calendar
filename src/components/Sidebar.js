@@ -5,12 +5,14 @@ import Labels from "./Labels";
 
 export default function Sidebar() {
   return (
-    <aside className="border p-5 pb-0 w-64">
-      <div className="flex">
+    <aside style={{ minHeight: "100vh" }} className=" p-5 pb-0 w-64 flex-col">
+      <div className="flex ">
         <CreateEventButton />
       </div>
       <SmallCalendar />
-      <Labels />
+      <div className="flex-1">
+        <Labels />
+      </div>
     </aside>
   );
 }

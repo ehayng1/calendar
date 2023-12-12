@@ -9,6 +9,10 @@ const GlobalContext = React.createContext({
   setDaySelected: (day) => {},
   showEventModal: false,
   setShowEventModal: () => {},
+  showDashBoard: false,
+  isDayMode: false,
+  setIsDayMode: () => {},
+  setShowDashBoard: () => {},
   dispatchCalEvent: ({ type, payload }) => {},
   savedEvents: [],
   selectedEvent: null,
@@ -23,6 +27,10 @@ const GlobalContext = React.createContext({
   setShowMore: () => {},
   labelList: {},
   setLabelList: () => {},
+  userId: "",
+  setUserId: () => {},
+  dayModeEvents: [],
+  setDayModeEvents: () => {},
 });
 
 export default GlobalContext;

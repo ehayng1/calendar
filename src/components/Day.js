@@ -4,6 +4,8 @@ import GlobalContext from "../context/GlobalContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import More from "./More";
+import { getUserId } from "../utils/firebase";
+import { Daymode } from "./Daymode";
 
 export default function Day({ day, rowIdx }) {
   const [dayEvents, setDayEvents] = useState([]);
@@ -21,12 +23,15 @@ export default function Day({ day, rowIdx }) {
     refresh,
     labelList,
     monthIndex,
+    userId,
+    setIsDayMode,
+    isDayMode,
+    setDayModeEvents,
   } = useContext(GlobalContext);
 
   useEffect(() => {
     const events = filteredEvents.filter(
-      (evt) =>
-        dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
+      (evt) => dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
     );
     setDayEvents(events);
   }, [filteredEvents, day]);
@@ -34,7 +39,9 @@ export default function Day({ day, rowIdx }) {
   //getEvents
   useEffect(() => {
     const getEvents = async () => {
-      const docRef = doc(db, "events", "EyepSY8B48R8cqeWozZs(USER1)");
+      // const docRef = doc(db, "events", "EyepSY8B48R8cqeWozZs(USER1)");
+      const tempId = await getUserId();
+      const docRef = doc(db, "events", tempId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -48,18 +55,16 @@ export default function Day({ day, rowIdx }) {
           }
         );
 
-        const sorted = filtered.sort(
-          (a, b) => a.timeIndex - b.timeIndex
-        );
+        const sorted = filtered.sort((a, b) => a.timeIndex - b.timeIndex);
 
         const arr = filtered.filter((el) => {
           return (
-            labelList[el.label] &&
-            Object.keys(labelList).includes(el.label)
+            labelList[el.label] && Object.keys(labelList).includes(el.label)
           );
         });
         setActiveEvents(arr.length);
 
+        // Array of events
         setEvents(sorted);
       } else {
         console.log("No such document!");
@@ -82,18 +87,24 @@ export default function Day({ day, rowIdx }) {
       <div
         className="border border-gray-200 flex flex-col"
         onClick={() => {
-          setDaySelected(day);
           setShowEventModal(true);
         }}
       >
-        <header className="flex flex-col items-center cursor-pointer">
+        <header className="flex flex-col items-center ">
           {rowIdx === 0 && (
             <p className="text-sm mt-1 font-semibold">
               {day.format("ddd").toUpperCase()}
             </p>
           )}
           <p
-            className={`text-sm p-1 mt-1 my text-center  ${getCurrentDayClass()}`}
+            className={`text-sm p-1 mt-1 my text-center cursor-pointer  ${getCurrentDayClass()}`}
+            onClick={(e) => {
+              e.stopPropagation();
+
+              setDayModeEvents(events);
+              setDaySelected(day);
+              setIsDayMode(true);
+            }}
           >
             {day.format("DD")}
           </p>
@@ -154,8 +165,7 @@ export default function Day({ day, rowIdx }) {
           >
             {events.filter((el) => {
               return (
-                labelList[el.label] &&
-                Object.keys(labelList).includes(el.label)
+                labelList[el.label] && Object.keys(labelList).includes(el.label)
               );
             }).length > 3 &&
               events.filter((el) => {

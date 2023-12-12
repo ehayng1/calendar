@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import GlobalContext from "../context/GlobalContext";
 import {
   doc,
@@ -12,15 +12,13 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import MuiSelect from "./Select";
+import {
+  getSexAndGrade,
+  incrementNumberofEvents,
+  incrementCounters,
+} from "../utils/firebase";
 
-const labelsClasses = [
-  "indigo",
-  "gray",
-  "green",
-  "blue",
-  "red",
-  "purple",
-];
+const labelsClasses = ["indigo", "gray", "green", "blue", "red", "purple"];
 
 export default function EventModal() {
   const {
@@ -31,11 +29,10 @@ export default function EventModal() {
     timeSelectedFormatted,
     setRefresh,
     refresh,
+    userId,
   } = useContext(GlobalContext);
 
-  const [title, setTitle] = useState(
-    selectedEvent ? selectedEvent.title : ""
-  );
+  const [title, setTitle] = useState(selectedEvent ? selectedEvent.title : "");
   const [description, setDescription] = useState(
     selectedEvent ? selectedEvent.description : ""
   );
@@ -45,7 +42,6 @@ export default function EventModal() {
       : labelsClasses[0]
   );
   const [id, setId] = useState(selectedEvent ? selectedEvent.id : "");
-
   const [startTime, setStartTime] = useState(timeSelectedFormatted);
   const [endTime, setEndTime] = useState();
 
@@ -82,6 +78,7 @@ export default function EventModal() {
     }
     setShowEventModal(false);
     // if user is updating an existing event -> updateDoc
+    // prolly fix this
     if (selectedEvent) {
       await updateDoc(docRef, {
         title: calendarEvent.title,
@@ -95,29 +92,35 @@ export default function EventModal() {
     }
     // user adding a new event
     else {
-      await updateDoc(
-        doc(db, "events", "EyepSY8B48R8cqeWozZs(USER1)"),
-        {
-          [now.getTime()]: {
-            title: calendarEvent.title,
-            description: calendarEvent.description,
-            label: selectedLabel,
-            startTime: startTime,
-            endTime: endTime,
-            hour: startTime,
-            month: daySelected.month() + 1,
-            year: daySelected.year(),
-            day: daySelected.date(),
-            date: daySelected.format("DD MMM YYYY"),
-            id: now.getTime(),
-            timeIndex: timeIndex,
-          },
-        }
-      );
+      await updateDoc(doc(db, "events", userId), {
+        [now.getTime()]: {
+          title: calendarEvent.title,
+          description: calendarEvent.description,
+          label: selectedLabel,
+          startTime: startTime,
+          endTime: endTime,
+          hour: startTime,
+          month: daySelected.month() + 1,
+          year: daySelected.year(),
+          day: daySelected.date(),
+          date: daySelected.format("DD MMM YYYY"),
+          id: now.getTime(),
+          timeIndex: timeIndex,
+        },
+      });
+      console.log("incrementing counters");
+      let data = await getSexAndGrade(userId);
+      let sex, grade;
+      sex = data.sex;
+      grade = data.grade;
+
+      await incrementCounters(grade, sex, "Other");
+      console.log("incrementing number of events");
+      await incrementNumberofEvents("Other", daySelected.format("DD MMM YYYY"));
     }
 
     // Update Labels
-    const labelRef = doc(db, "label", "EyepSY8B48R8cqeWozZs(USER1)");
+    const labelRef = doc(db, "label", userId);
     await updateDoc(labelRef, {
       [selectedLabel]: increment(1),
     });
@@ -125,12 +128,13 @@ export default function EventModal() {
   }
 
   async function handleDelete() {
-    const docRef = doc(db, "events", "EyepSY8B48R8cqeWozZs(USER1)");
+    const docRef = doc(db, "events", userId);
     await updateDoc(docRef, {
       [id]: deleteField(),
     });
     // Remove Labels
-    const labelRef = doc(db, "label", "EyepSY8B48R8cqeWozZs(USER1)");
+    const labelRef = doc(db, "label", userId);
+    // const labelRef = doc(db, "label", "EyepSY8B48R8cqeWozZs(USER1)");
     await updateDoc(labelRef, {
       [selectedLabel]: increment(-1),
     });
@@ -193,10 +197,7 @@ export default function EventModal() {
               <div className="material-icons-outlined text-gray-400 w-12">
                 schedule
               </div>
-              <div
-                className="mr-10"
-                style={{ marginRight: "1.5rem" }}
-              >
+              <div className="mr-10" style={{ marginRight: "1.5rem" }}>
                 {daySelected.format("dddd, MMMM DD")}
               </div>
               <MuiSelect
