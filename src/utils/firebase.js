@@ -71,3 +71,12 @@ export async function incrementCounters(grade, sex, type) {
     [type]: increment(1),
   });
 }
+
+// updates hoursofEachActivity of firebase
+// if activity exists, increment the hours. If not, set a new doc.
+export async function incrementActivityHours(hour, title) {
+  const docRef = doc(db, "stats", "hoursofEachActivity");
+  await setDoc(docRef, {
+    [title]: increment(hour),
+  });
+}

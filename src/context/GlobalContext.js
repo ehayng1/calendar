@@ -9,6 +9,8 @@ const GlobalContext = React.createContext({
   setDaySelected: (day) => {},
   showEventModal: false,
   setShowEventModal: () => {},
+  showSurveyModal: false,
+  setShowSurveyModal: () => {},
   showDashBoard: false,
   isDayMode: false,
   setIsDayMode: () => {},
@@ -31,6 +33,12 @@ const GlobalContext = React.createContext({
   setUserId: () => {},
   dayModeEvents: [],
   setDayModeEvents: () => {},
+  closetEvent: {},
+  setClosetEvent: () => {},
+  doNotShowPreSurveyDate: "",
+  setDoNotShowPreSurveyDate: () => {},
+  doNotShowPostSurveyDate: "",
+  setDoNotShowPostSurveyDate: () => {},
 });
 
 export default GlobalContext;

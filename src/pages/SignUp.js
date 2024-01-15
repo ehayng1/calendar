@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -18,6 +18,8 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import dayjs from "dayjs";
+import GlobalContext from "../context/GlobalContext";
 
 // FIREBASE IMPORTS
 import {
@@ -34,6 +36,8 @@ const auth = getAuth();
 
 const theme = createTheme();
 
+const { userId } = useContext(GlobalContext);
+
 export function SignUp() {
   const [values, setValues] = useState({
     firstName: "",
@@ -46,6 +50,44 @@ export function SignUp() {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  function generateActivities() {
+    const now = new Date();
+    const dayjsDate = dayjs(now);
+
+    let timeIndex = 0;
+    if (startTime.slice(-2) === "pm") {
+      timeIndex = timeIndex + 12;
+    }
+    let hour = parseInt(startTime.slice(0, 2));
+    if (hour != "12") {
+      timeIndex = timeIndex + hour;
+    }
+    if (startTime.split(":")[1].slice(0, 1) == "3") {
+      timeIndex = timeIndex + 0.5;
+    }
+
+    let eventData = {
+      // title: Meditation or music,
+      // description: Recommend activity: Meditation or music,
+      label: red,
+      startTime: "10:00pm",
+      endTime: "10:30pm",
+      hour: "10:00pm",
+      month: dayjsDate.month() + 1,
+      year: dayjsDate.year(),
+      day: dayjsDate.date(),
+      date: dayjsDate.format("DD MMM YYYY"),
+      id: now.getTime(),
+      timeIndex: timeIndex,
+    };
+  }
+
+  async function addRecActivites(data) {
+    await updateDoc(doc(db, "events", userId), {
+      [new Date().getTime()]: data,
+    });
+  }
 
   const signUpUser = () => {
     if (values.email == "") {
@@ -89,7 +131,7 @@ export function SignUp() {
         await setDoc(doc(db, "events", uniqueId), {});
         await setDoc(doc(db, "label", uniqueId), {
           blue: 0,
-          gray: 0,
+          grey: 0,
           green: 0,
           indigo: 0,
           purple: 0,
@@ -272,6 +314,17 @@ export function SignUp() {
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             /> */}
+
+              <Box sx={{ mt: 2, mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  // align="center"
+                >
+                  Please make sure that you sign up with the same email address
+                  with that of the survey.
+                </Typography>
+              </Box>
               <Button
                 type="submit"
                 fullWidth
@@ -280,6 +333,7 @@ export function SignUp() {
               >
                 Sign up
               </Button>
+
               <Grid container>
                 <Grid item xs>
                   <Link href="#" variant="body2">

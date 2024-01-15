@@ -1,20 +1,28 @@
 import GlobalContext from "../context/GlobalContext";
+import dayjs from "dayjs";
 import React, { useContext, useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { getUserId } from "../utils/firebase";
+import { db } from "../firebase";
 export function Daymode() {
-  const { setIsDayMode, dayModeEvents, daySelected } =
-    useContext(GlobalContext);
-
-  function exitDayMode() {
-    setIsDayMode(false);
-  }
+  const [resetter, setreset] = useState();
+  const {
+    setIsDayMode,
+    dayModeEvents,
+    daySelected,
+    labelList,
+    setDayModeEvents,
+    setShowEventModal,
+    setSelectedEvent,
+  } = useContext(GlobalContext);
 
   function isEventInRange(start, end, hour) {
     // Convert start and end times to 24-hour format
     const startTime = parseTimeTo24HourFormat(start);
     const endTime = parseTimeTo24HourFormat(end);
-    console.log("Start: ", startTime);
-    console.log("End: ", endTime);
-    console.log("Hour: ", hour);
+    // console.log("Start: ", startTime);
+    // console.log("End: ", endTime);
+    // console.log("Hour: ", hour);
 
     // Check if the hour is within or equal to the range
     return hour >= startTime && hour <= endTime;
@@ -62,14 +70,22 @@ export function Daymode() {
             <div style={{ minHeight: "3rem" }} class="w-11/12 text-sm ">
               {dayModeEvents.map(
                 (el, i) =>
-                  isEventInRange(el.hour, el.endTime, hour) && (
+                  isEventInRange(el.startTime, el.endTime, hour) && (
                     <div
-                      className="bg-blue-400 text-white rounded px-2 py-1 pb-2 mb-1"
+                      onClick={() => {
+                        setSelectedEvent(el);
+                        setShowEventModal(true);
+                      }}
+                      className={`bg-${el.label}-400 text-white rounded px-2 py-1 pb-2 mb-1 cursor-pointer`}
                       key={i}
+                      style={{
+                        backgroundColor: el.label,
+                        opacity: "0.6",
+                      }}
                     >
                       <p>{el.title}</p>
                       <p>
-                        {el.hour} ~ {el.endTime}
+                        {el.startTime} ~ {el.endTime}
                       </p>
                     </div>
                   )
@@ -80,6 +96,71 @@ export function Daymode() {
       </div>
     ));
   };
+  console.log(daySelected);
+
+  useEffect(() => {
+    console.log("getting events...");
+    let day = daySelected;
+    const getEvents = async () => {
+      // const docRef = doc(db, "events", "EyepSY8B48R8cqeWozZs(USER1)");
+      const tempId = await getUserId();
+      const docRef = doc(db, "events", tempId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = Object.values(docSnap.data());
+        // data.startTime = data.startTime.split(":")[1];
+
+        const filtered = [...data].filter(
+          // (el) => el.date === day.format("DD MMM YYYY")
+          (el) => {
+            return el.date === day.format("DD MMM YYYY");
+          }
+        );
+
+        const sorted = filtered.sort((a, b) => a.timeIndex - b.timeIndex);
+
+        // function that gets the closet date for event
+        let date = new Date();
+        let currentTimeIndex = date.getHours() + date.getMinutes() / 60;
+        let closest = { day: 31, timeIndex: 24 };
+        for (const el of sorted) {
+          if (
+            el.month == date.getMonth() + 1 &&
+            el.day >= date.getDate() &&
+            el.timeIndex > currentTimeIndex &&
+            el.day <= closest.day &&
+            el.timeIndex < closest.timeIndex
+          ) {
+            closest = el;
+            console.log("Closest: ", el);
+          }
+        }
+
+        // // updates the closest event
+        // if (
+        //   closest.day <= closetEvent.day &&
+        //   closest.timeIndex < closetEvent.timeIndex
+        // ) {
+        //   console.log("Updating closest Event");
+        //   // setClosetEvent(closest);
+        // }
+
+        const arr = filtered.filter((el) => {
+          return (
+            labelList[el.label] && Object.keys(labelList).includes(el.label)
+          );
+        });
+        // setActiveEvents(arr.length);
+
+        // Array of events
+        setDayModeEvents(sorted);
+      } else {
+        console.log("No such document!");
+      }
+    };
+    getEvents();
+  }, [daySelected]);
 
   console.log(dayModeEvents);
   return (

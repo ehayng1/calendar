@@ -6,6 +6,7 @@ import { db } from "../firebase";
 import More from "./More";
 import { getUserId } from "../utils/firebase";
 import { Daymode } from "./Daymode";
+import QuizIcon from "@mui/icons-material/Quiz";
 
 export default function Day({ day, rowIdx }) {
   const [dayEvents, setDayEvents] = useState([]);
@@ -27,6 +28,8 @@ export default function Day({ day, rowIdx }) {
     setIsDayMode,
     isDayMode,
     setDayModeEvents,
+    closetEvent,
+    setClosetEvent,
   } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -38,6 +41,7 @@ export default function Day({ day, rowIdx }) {
 
   //getEvents
   useEffect(() => {
+    // console.log("getting events...");
     const getEvents = async () => {
       // const docRef = doc(db, "events", "EyepSY8B48R8cqeWozZs(USER1)");
       const tempId = await getUserId();
@@ -56,6 +60,32 @@ export default function Day({ day, rowIdx }) {
         );
 
         const sorted = filtered.sort((a, b) => a.timeIndex - b.timeIndex);
+
+        // function that gets the closet date for event
+        let date = new Date();
+        let currentTimeIndex = date.getHours() + date.getMinutes() / 60;
+        let closest = { day: 31, timeIndex: 24 };
+        for (const el of sorted) {
+          if (
+            el.month == date.getMonth() + 1 &&
+            el.day >= date.getDate() &&
+            el.timeIndex > currentTimeIndex &&
+            el.day <= closest.day &&
+            el.timeIndex < closest.timeIndex
+          ) {
+            closest = el;
+            console.log("Closest: ", el);
+          }
+        }
+
+        // updates the closest event
+        if (
+          closest.day <= closetEvent.day &&
+          closest.timeIndex < closetEvent.timeIndex
+        ) {
+          console.log("Updating closest Event");
+          setClosetEvent(closest);
+        }
 
         const arr = filtered.filter((el) => {
           return (
@@ -87,6 +117,7 @@ export default function Day({ day, rowIdx }) {
       <div
         className="border border-gray-200 flex flex-col"
         onClick={() => {
+          setDaySelected(day);
           setShowEventModal(true);
         }}
       >
@@ -96,22 +127,36 @@ export default function Day({ day, rowIdx }) {
               {day.format("ddd").toUpperCase()}
             </p>
           )}
-          <p
-            className={`text-sm p-1 mt-1 my text-center cursor-pointer  ${getCurrentDayClass()}`}
-            onClick={(e) => {
-              e.stopPropagation();
-
-              setDayModeEvents(events);
-              setDaySelected(day);
-              setIsDayMode(true);
-            }}
-          >
-            {day.format("DD")}
-          </p>
+          <div className="flex items-center">
+            <p
+              className={`text-sm p-1 mt-1 my text-center cursor-pointer  ${getCurrentDayClass()}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setDayModeEvents(events);
+                setDaySelected(day);
+                setIsDayMode(true);
+              }}
+            >
+              {day.format("DD")}
+            </p>
+            {day.format("DD") == "14" && (
+              <a
+                onClick={(e) => e.stopPropagation()}
+                href="https://docs.google.com/forms/u/0/d/e/1FAIpQLScOxbF_Nps-GR6oQDdIJ71YYl10uB8Qh8kxVeSiZe1EqQzixg/formResponse"
+                target="_blank"
+              >
+                <QuizIcon
+                  // onClick={handleProfileMenuOpen}
+                  sx={{ color: "#FF3333" }}
+                ></QuizIcon>
+              </a>
+            )}
+          </div>
         </header>
         <div className="flex-1 cursor-pointer">
           <div
             onClick={() => {
+              console.log(day);
               setDaySelected(day);
               setShowEventModal(true);
             }}
@@ -128,11 +173,15 @@ export default function Day({ day, rowIdx }) {
               .map((evt, idx) => (
                 <div className="flex items-center">
                   <div
-                    className={`bg-${evt.label}-500  w-3 h-3 mr-1 ml-1 rounded-full  cursor-pointer`}
-                    style={{
-                      backgroundColor: evt.label,
-                      // opacity: "0.7",
-                    }}
+                    className={`bg-${
+                      evt.label == "grey" ? "gray" : evt.label
+                    }-400  w-3 h-3 mr-1 ml-1 rounded-full  cursor-pointer`}
+                    style={
+                      {
+                        // backgroundColor: evt.label,
+                        // opacity: "0.6",
+                      }
+                    }
                   ></div>
                   <div
                     key={idx}

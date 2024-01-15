@@ -7,7 +7,7 @@ import Select from "@mui/material/Select";
 import Paper from "@mui/material/Paper"; // Import Paper component
 import NativeSelect from "@mui/material/NativeSelect";
 import GlobalContext from "../context/GlobalContext";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 // export default function MuiSelect({
 //   start,
@@ -81,8 +81,17 @@ export default function MuiSelect({
   handleEndChange,
 }) {
   const [time, setTime] = React.useState("");
+  const [startTime, setStartTime] = React.useState();
+  const [endTime, setEndTime] = React.useState();
 
   const { timeSelected } = useContext(GlobalContext);
+
+  console.log(start);
+
+  useEffect(() => {
+    setStartTime(start);
+    setEndTime(end);
+  }, [start, end]);
 
   const handleChange = (event) => {
     let value = event.target.value;
@@ -94,9 +103,7 @@ export default function MuiSelect({
     // const selectedTime = new Date();
     // selectedTime.setHours(h, m, 0, 0);
     // console.log(selectedTime);
-    label === "start"
-      ? handleStartChange(value)
-      : handleEndChange(value);
+    label === "start" ? handleStartChange(value) : handleEndChange(value);
   };
 
   const times = [];
@@ -144,6 +151,7 @@ export default function MuiSelect({
           sx={{ minWidth: "8vw" }}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
+          // value={label === "start" ? startTime : endTime}
           value={label === "start" ? start : end}
           label={label}
           onChange={handleChange}

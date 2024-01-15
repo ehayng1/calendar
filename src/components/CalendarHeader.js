@@ -30,9 +30,17 @@ const ProfileMenu = styled(Paper)(() => ({
   borderRadius: "1rem",
 }));
 
-export default function CalendarHeader({ isAdmin }) {
-  const { monthIndex, setMonthIndex, refresh, setRefresh, setShowDashBoard } =
-    useContext(GlobalContext);
+export default function CalendarHeader({ isAdmin, isLoggedIn }) {
+  const {
+    monthIndex,
+    setMonthIndex,
+    refresh,
+    setRefresh,
+    setShowDashBoard,
+    isDayMode,
+    setIsDayMode,
+    setDaySelected,
+  } = useContext(GlobalContext);
   function handlePrevMonth() {
     setMonthIndex(monthIndex - 1);
   }
@@ -45,6 +53,7 @@ export default function CalendarHeader({ isAdmin }) {
         ? monthIndex + Math.random()
         : dayjs().month()
     );
+    setDaySelected(dayjs());
   }
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -125,16 +134,29 @@ export default function CalendarHeader({ isAdmin }) {
           </MenuItem>
         )}
         <Divider></Divider>
-        <MenuItem
-          style={{ marginBottom: "0.5rem" }}
-          onClick={() => {
-            logOut();
-            handleMenuClose();
-            navigate("/signin");
-          }}
-        >
-          Log Out
-        </MenuItem>
+        {isLoggedIn ? (
+          <MenuItem
+            style={{ marginBottom: "0.5rem" }}
+            onClick={() => {
+              logOut();
+              handleMenuClose();
+              navigate("/signin");
+            }}
+          >
+            Log Out
+          </MenuItem>
+        ) : (
+          <MenuItem
+            style={{ marginBottom: "0.5rem" }}
+            onClick={() => {
+              handleMenuClose();
+              navigate("/signin");
+            }}
+          >
+            Log In
+          </MenuItem>
+        )}
+
         {/* // test tab */}
         {/* <MenuItem
           style={{ marginBottom: "0.5rem" }}
@@ -150,9 +172,12 @@ export default function CalendarHeader({ isAdmin }) {
   );
   return (
     <header className="pl-4 py-2 flex items-center border-b border-gray-300 ">
-      <img src={logo} alt="calendar" className="mr-2 w-12 h-12" />
-      <h1 className="mr-10 text-xl text-gray-500 fond-bold">Calendar</h1>
-      <button onClick={handleReset} className="border rounded py-2 px-4 mr-5">
+      <img src={logo} alt="calendar" className="mr-12 w-12 h-12 ml-8" />
+      {/* <h1 className="mr-10 text-xl text-gray-500 fond-bold">Calendar</h1> */}
+      <button
+        onClick={handleReset}
+        className="border rounded py-2 px-4 mr-5 ml-12"
+      >
         Today
       </button>
       <button onClick={handlePrevMonth}>
@@ -168,7 +193,24 @@ export default function CalendarHeader({ isAdmin }) {
       <h2 className="ml-4 text-xl text-gray-500 font-bold flex-1">
         {dayjs(new Date(dayjs().year(), monthIndex)).format("MMMM YYYY")}
       </h2>
-
+      {
+        isDayMode && (
+          <button
+            onClick={() => setIsDayMode(false)}
+            className="border rounded py-2 px-4 mr-5"
+          >
+            Month Mode
+          </button>
+        )
+        // : (
+        //   <button
+        //     onClick={() => setIsDayMode(true)}
+        //     className="border rounded py-2 px-4 mr-5"
+        //   >
+        //     Day Mode
+        //   </button>
+        // )
+      }
       <Box sx={{ display: { xs: "none", md: "flex" }, marginRight: "-6rem" }}>
         <IconButton
           size="large"

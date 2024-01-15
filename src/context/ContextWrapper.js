@@ -27,6 +27,11 @@ export default function ContextWrapper(props) {
   const [daySelected, setDaySelected] = useState(dayjs());
   const [showEventModal, setShowEventModal] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [closetEvent, setClosetEvent] = useState({ day: 31, timeIndex: 24 });
+
+  const [doNotShowPreSurveyDate, setDoNotShowPreSurveyDate] = useState("");
+  const [doNotShowPostSurveyDate, setDoNotShowPostSurveyDate] = useState("");
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [labels, setLabels] = useState([]);
@@ -39,7 +44,7 @@ export default function ContextWrapper(props) {
     red: true,
     purple: true,
     green: true,
-    gray: true,
+    grey: true,
     blue: true,
   });
   const [savedEvents, dispatchCalEvent] = useReducer(
@@ -122,6 +127,14 @@ export default function ContextWrapper(props) {
         setUserId,
         dayModeEvents,
         setDayModeEvents,
+        closetEvent,
+        setClosetEvent,
+        showSurveyModal,
+        setShowSurveyModal,
+        doNotShowPreSurveyDate,
+        setDoNotShowPreSurveyDate,
+        doNotShowPostSurveyDate,
+        setDoNotShowPostSurveyDate,
       }}
     >
       {props.children}

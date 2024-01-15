@@ -15,13 +15,21 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 // import { Dashboard } from "./components/Dashboard";
 import Dashboard from "./Modernize/src/views/dashboard/Dashboard";
 import { Daymode } from "./components/Daymode";
+import SurveyModal from "./components/SurveyModal";
 
 function Calendar() {
   const [currenMonth, setCurrentMonth] = useState(getMonth());
-  const { monthIndex, showEventModal, showDashBoard, setUserId, isDayMode } =
-    useContext(GlobalContext);
+  const {
+    monthIndex,
+    showEventModal,
+    showDashBoard,
+    setUserId,
+    isDayMode,
+    showSurveyModal,
+    setShowSurveyModal,
+  } = useContext(GlobalContext);
   // const [id, setId] = useState("");
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [isLoggedIn, setLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const auth = getAuth();
@@ -56,9 +64,10 @@ function Calendar() {
   return (
     <React.Fragment>
       {showEventModal && <EventModal />}
+      {showSurveyModal && <SurveyModal />}
 
       <div className="h-screen flex flex-col">
-        <CalendarHeader isAdmin={isAdmin} />
+        <CalendarHeader isAdmin={isAdmin} isLoggedIn={isLoggedIn} />
         {showDashBoard ? (
           <Dashboard />
         ) : (

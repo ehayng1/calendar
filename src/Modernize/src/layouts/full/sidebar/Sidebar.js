@@ -1,13 +1,12 @@
-import { useMediaQuery, Box, Drawer } from '@mui/material';
-import Logo from '../shared/logo/Logo';
-import SidebarItems from './SidebarItems';
-import { Upgrade } from './Updrade';
+import { useMediaQuery, Box, Drawer } from "@mui/material";
+import Logo from "../shared/logo/Logo";
+import SidebarItems from "./SidebarItems";
+import { Upgrade } from "./Updrade";
 
 const Sidebar = (props) => {
-
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
 
-  const sidebarWidth = '270px';
+  const sidebarWidth = "270px";
 
   if (lgUp) {
     return (
@@ -27,7 +26,7 @@ const Sidebar = (props) => {
           PaperProps={{
             sx: {
               width: sidebarWidth,
-              boxSizing: 'border-box',
+              boxSizing: "border-box",
             },
           }}
         >
@@ -36,7 +35,7 @@ const Sidebar = (props) => {
           {/* ------------------------------------------- */}
           <Box
             sx={{
-              height: '100%',
+              height: "100%",
             }}
           >
             {/* ------------------------------------------- */}
@@ -52,7 +51,6 @@ const Sidebar = (props) => {
               <SidebarItems />
               <Upgrade />
             </Box>
-            
           </Box>
         </Drawer>
       </Box>

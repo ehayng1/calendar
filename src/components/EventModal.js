@@ -30,6 +30,10 @@ export default function EventModal() {
     setRefresh,
     refresh,
     userId,
+    showSurveyModal,
+    setShowSurveyModal,
+    setDayModeEvents,
+    dayModeEvents,
   } = useContext(GlobalContext);
 
   const [title, setTitle] = useState(selectedEvent ? selectedEvent.title : "");
@@ -45,58 +49,78 @@ export default function EventModal() {
   const [startTime, setStartTime] = useState(timeSelectedFormatted);
   const [endTime, setEndTime] = useState();
 
+  async function setTime() {
+    const docRef = doc(db, "events", userId);
+    const docSnap = await getDoc(docRef);
+    let data = docSnap.data()[id];
+    setStartTime(data.startTime);
+    setEndTime(data.endTime);
+  }
+
+  useEffect(() => {
+    console.log(selectedEvent);
+    if (selectedEvent) {
+      // setTime();
+    }
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
-    const dateString = daySelected.format("ddd MMM YYYY");
+    if (!startTime) {
+      alert("Please enter start time.");
+    } else if (!endTime) {
+      alert("Please enter end time.");
+    } else if (!title) {
+      alert("Please enter title.");
+    } else if (!description) {
+      alert("Please enter description.");
+    } else {
+      const dateString = daySelected.format("ddd MMM YYYY");
 
-    const calendarEvent = {
-      title,
-      description,
-      label: selectedLabel,
-      day: daySelected.valueOf(),
-      // id: selectedEvent ? selectedEvent.id : Date.now(),
-      id: new Date().getTime(),
-    };
-    // if (selectedEvent) {
-    //   dispatchCalEvent({ type: "update", payload: calendarEvent });
-    // } else {
-    //   dispatchCalEvent({ type: "push", payload: calendarEvent });
-    // }
-    const now = new Date();
-    const docRef = doc(db, "events", dateString);
-    let timeIndex = 0;
-    console.log(startTime);
-    if (startTime.slice(-2) === "pm") {
-      timeIndex = timeIndex + 12;
-    }
-    let hour = parseInt(startTime.slice(0, 2));
-    if (hour != "12") {
-      timeIndex = timeIndex + hour;
-    }
-    if (startTime.split(":")[1].slice(0, 1) == "3") {
-      timeIndex = timeIndex + 0.5;
-    }
-    setShowEventModal(false);
-    // if user is updating an existing event -> updateDoc
-    // prolly fix this
-    if (selectedEvent) {
-      await updateDoc(docRef, {
-        title: calendarEvent.title,
-        description: calendarEvent.description,
+      const calendarEvent = {
+        title,
+        description,
         label: selectedLabel,
-        startTime: startTime,
-        startTime: startTime,
-        endTime: endTime,
-        timeIndex: timeIndex,
-      });
-    }
-    // user adding a new event
-    else {
-      await updateDoc(doc(db, "events", userId), {
-        [now.getTime()]: {
+        day: daySelected.valueOf(),
+        // id: selectedEvent ? selectedEvent.id : Date.now(),
+        id: new Date().getTime(),
+      };
+      const now = new Date();
+      const docRef = doc(db, "events", dateString);
+      let timeIndex = 0;
+      console.log(startTime);
+      if (startTime.slice(-2) === "pm") {
+        timeIndex = timeIndex + 12;
+      }
+      let hour = parseInt(startTime.slice(0, 2));
+      if (hour != "12") {
+        timeIndex = timeIndex + hour;
+      }
+      if (startTime.split(":")[1].slice(0, 1) == "3") {
+        timeIndex = timeIndex + 0.5;
+      }
+      setShowEventModal(false);
+      // if user is updating an existing event -> updateDoc
+
+      if (selectedEvent) {
+        const docRef = doc(db, "events", userId);
+        const docSnap = await getDoc(docRef);
+        let data = docSnap.data()[id];
+        data.title = calendarEvent.title;
+        data.description = calendarEvent.description;
+        data.label = selectedLabel == "gray" ? "grey" : selectedLabel;
+        data.startTime = startTime;
+        data.endTime = endTime;
+        await updateDoc(docRef, {
+          [id]: data,
+        });
+      }
+      // user adding a new event
+      else {
+        let eventData = {
           title: calendarEvent.title,
           description: calendarEvent.description,
-          label: selectedLabel,
+          label: selectedLabel == "gray" ? "grey" : selectedLabel,
           startTime: startTime,
           endTime: endTime,
           hour: startTime,
@@ -106,25 +130,33 @@ export default function EventModal() {
           date: daySelected.format("DD MMM YYYY"),
           id: now.getTime(),
           timeIndex: timeIndex,
-        },
+        };
+        await updateDoc(doc(db, "events", userId), {
+          [now.getTime()]: eventData,
+        });
+        console.log("New daymode events", [...dayModeEvents, eventData]);
+        setDayModeEvents([...dayModeEvents, eventData]);
+        console.log("incrementing counters");
+        let data = await getSexAndGrade(userId);
+        let sex, grade;
+        sex = data.sex;
+        grade = data.grade;
+
+        await incrementCounters(grade, sex, "Other");
+        console.log("incrementing number of events");
+        await incrementNumberofEvents(
+          "Other",
+          daySelected.format("DD MMM YYYY")
+        );
+      }
+
+      // Update Labels
+      const labelRef = doc(db, "label", userId);
+      await updateDoc(labelRef, {
+        [selectedLabel]: increment(1),
       });
-      console.log("incrementing counters");
-      let data = await getSexAndGrade(userId);
-      let sex, grade;
-      sex = data.sex;
-      grade = data.grade;
-
-      await incrementCounters(grade, sex, "Other");
-      console.log("incrementing number of events");
-      await incrementNumberofEvents("Other", daySelected.format("DD MMM YYYY"));
+      setRefresh(!refresh);
     }
-
-    // Update Labels
-    const labelRef = doc(db, "label", userId);
-    await updateDoc(labelRef, {
-      [selectedLabel]: increment(1),
-    });
-    setRefresh(!refresh);
   }
 
   async function handleDelete() {
@@ -271,7 +303,32 @@ export default function EventModal() {
             </div>
           </div>
         </div>
-        <footer className="flex justify-end border-t p-3 mt-5">
+        <footer className="flex border-t p-3 mt-5">
+          <a
+            className="bg-blue-500 hover:bg-blue-600 px-6 py-2 mr-2 rounded text-white "
+            href="https://docs.google.com/forms/d/e/1FAIpQLSe7XloCD6gm4N1EeIColoyNwOXzxS1rQ22M1CX1OpX8u8Ql9Q/formResponse?pli=1"
+            target="_blank"
+          >
+            Pre Survey
+          </a>
+
+          <a
+            href="https://docs.google.com/forms/u/0/d/e/1FAIpQLScOxbF_Nps-GR6oQDdIJ71YYl10uB8Qh8kxVeSiZe1EqQzixg/formResponse"
+            target="_blank"
+            className="bg-blue-500 hover:bg-blue-600 px-6 py-2 mr-2 rounded text-white "
+          >
+            Post Survey
+          </a>
+          {/* <button
+            onClick={() => {
+              setShowEventModal(false);
+              setShowSurveyModal(true);
+            }}
+            className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded text-white"
+          >
+            알림
+          </button> */}
+          <div className="flex-1"></div>
           <button
             type="submit"
             onClick={handleSubmit}

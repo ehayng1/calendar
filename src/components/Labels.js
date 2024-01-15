@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import GlobalContext from "../context/GlobalContext";
 import SurveyButton from "./SurveyButton";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { height } from "@mui/system";
 import { getUserId } from "../utils/firebase";
@@ -18,16 +18,8 @@ export default function Labels() {
   const [serverLabels, setServerLabels] = useState([]);
   const [labelNames, setLabelNames] = useState({});
   const [editMode, setEditMode] = useState(false);
-  const labelsClasses = ["indigo", "gray", "green", "blue", "red", "purple"];
+  const labelsClasses = ["indigo", "grey", "green", "blue", "red", "purple"];
   let userId;
-
-  //gets user id
-  // useEffect(() => {
-  //   async function init() {
-
-  //   }
-  //   init();
-  // }, []);
 
   useEffect(() => {
     const getLabels = async () => {
@@ -51,6 +43,9 @@ export default function Labels() {
     getLabels();
   }, [refresh]);
 
+  // console.log("labelNames: ", labelNames);
+  // console.log("label list: ", labelList);
+
   useEffect(() => {
     const getLabelNames = async () => {
       userId = await getUserId();
@@ -60,6 +55,7 @@ export default function Labels() {
       if (docSnap.exists()) {
         let data = docSnap.data();
         setLabelNames(data);
+
         // setServerLabels(filtered);
       } else {
         console.log("No such document!");
@@ -73,9 +69,14 @@ export default function Labels() {
     setEditMode(!editMode);
   }
 
-  function handleSave() {
-    /// write here!
+  async function handleSave() {
+    /// write firebase code here!
     setEditMode(!editMode);
+    // const docRef = doc(db, "labelNames", userId);
+    // await setDoc(docRef, labelNames);
+    console.log("Saving the label names...");
+    userId = await getUserId();
+    await setDoc(doc(db, "labelNames", userId), labelNames);
   }
 
   return (
@@ -105,6 +106,10 @@ export default function Labels() {
                     console.log(labels);
                   }}
                   className={`form-checkbox h-5 w-5 text-${el}-400 rounded focus:ring-0 cursor-pointer`}
+                  style={{
+                    backgroundColor: labelList[el] ? el : "",
+                    opacity: "0.6",
+                  }}
                 />
                 <span className="ml-2 text-gray-700 capitalize">
                   {editMode ? (
@@ -117,6 +122,12 @@ export default function Labels() {
                       type="text"
                       id="fname"
                       name="fname"
+                      onChange={(e) => {
+                        // console.log(e.target.value);
+                        setLabelNames({ ...labelNames, [el]: e.target.value });
+                        // setLabelNames(labelNames[el])
+                        // setstate....
+                      }}
                       placeholder={labelNames[el]}
                     ></input>
                   ) : (
