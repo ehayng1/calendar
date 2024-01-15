@@ -139,7 +139,7 @@ export function SignUp() {
         await setDoc(doc(db, "labelNames", uniqueId), {
           // default color names are just the color itself
           blue: "blue",
-          gray: "gray",
+          grey: "grey",
           green: "green",
           indigo: "indigo",
           purple: "purple",

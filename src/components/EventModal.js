@@ -18,7 +18,7 @@ import {
   incrementCounters,
 } from "../utils/firebase";
 
-const labelsClasses = ["indigo", "gray", "green", "blue", "red", "purple"];
+const labelsClasses = ["indigo", "grey", "green", "blue", "red", "purple"];
 
 export default function EventModal() {
   const {
@@ -153,11 +153,12 @@ export default function EventModal() {
       // Update Labels
       const labelRef = doc(db, "label", userId);
       await updateDoc(labelRef, {
-        [selectedLabel]: increment(1),
+        [selectedLabel == "gray" ? "grey" : selectedLabel]: increment(1),
       });
       setRefresh(!refresh);
     }
   }
+  console.log(selectedLabel);
 
   async function handleDelete() {
     const docRef = doc(db, "events", userId);
@@ -166,9 +167,9 @@ export default function EventModal() {
     });
     // Remove Labels
     const labelRef = doc(db, "label", userId);
-    // const labelRef = doc(db, "label", "EyepSY8B48R8cqeWozZs(USER1)");
+    console.log(selectedLabel);
     await updateDoc(labelRef, {
-      [selectedLabel]: increment(-1),
+      [selectedLabel == "gray" ? "grey" : selectedLabel]: increment(-1),
     });
     setShowEventModal(false);
     setRefresh(!refresh);
@@ -180,7 +181,12 @@ export default function EventModal() {
     setEndTime(newTime);
   };
   return (
-    <div className="h-screen w-full fixed left-0 top-0 flex justify-center items-center">
+    <div
+      className="h-screen w-full fixed left-0 top-0 flex justify-center items-center"
+      style={{
+        zIndex: 1000,
+      }}
+    >
       {/* <form className="bg-white rounded-lg shadow-2xl w-1/2"> */}
       <form className="bg-white rounded-lg shadow-2xl ">
         <header className="bg-gray-100 px-4 py-2 flex justify-between items-center">
@@ -288,9 +294,15 @@ export default function EventModal() {
               <div className="flex gap-x-2">
                 {labelsClasses.map((lblClass, i) => (
                   <span
+                    style={{
+                      backgroundColor: lblClass,
+                      opacity: "0.6",
+                    }}
                     key={i}
                     onClick={() => setSelectedLabel(lblClass)}
-                    className={`bg-${lblClass}-500 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer`}
+                    className={`bg-${
+                      lblClass == "grey" ? "gray" : lblClass
+                    }-500 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer`}
                   >
                     {selectedLabel === lblClass && (
                       <span className="material-icons-outlined text-white text-sm">

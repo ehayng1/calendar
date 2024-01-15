@@ -105,7 +105,9 @@ export default function Labels() {
                     setLabelList(labels);
                     console.log(labels);
                   }}
-                  className={`form-checkbox h-5 w-5 text-${el}-400 rounded focus:ring-0 cursor-pointer`}
+                  className={`form-checkbox h-5 w-5 text-${
+                    el == "grey" ? "gray" : el
+                  }-400 rounded focus:ring-0 cursor-pointer`}
                   style={{
                     backgroundColor: labelList[el] ? el : "",
                     opacity: "0.6",

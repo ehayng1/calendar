@@ -176,12 +176,10 @@ export default function Day({ day, rowIdx }) {
                     className={`bg-${
                       evt.label == "grey" ? "gray" : evt.label
                     }-400  w-3 h-3 mr-1 ml-1 rounded-full  cursor-pointer`}
-                    style={
-                      {
-                        // backgroundColor: evt.label,
-                        // opacity: "0.6",
-                      }
-                    }
+                    style={{
+                      backgroundColor: evt.label,
+                      opacity: "0.6",
+                    }}
                   ></div>
                   <div
                     key={idx}
