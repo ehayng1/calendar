@@ -27,7 +27,7 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { getUserId } from "../utils/firebase";
 // import { getUserId } from "../utils/Firebase";
@@ -36,9 +36,8 @@ const auth = getAuth();
 
 const theme = createTheme();
 
-const { userId } = useContext(GlobalContext);
-
 export function SignUp() {
+  const { userId } = useContext(GlobalContext);
   const [values, setValues] = useState({
     firstName: "",
     lastName: "",
@@ -51,37 +50,37 @@ export function SignUp() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  function generateActivities() {
-    const now = new Date();
-    const dayjsDate = dayjs(now);
+  // function generateActivities() {
+  //   const now = new Date();
+  //   const dayjsDate = dayjs(now);
 
-    let timeIndex = 0;
-    if (startTime.slice(-2) === "pm") {
-      timeIndex = timeIndex + 12;
-    }
-    let hour = parseInt(startTime.slice(0, 2));
-    if (hour != "12") {
-      timeIndex = timeIndex + hour;
-    }
-    if (startTime.split(":")[1].slice(0, 1) == "3") {
-      timeIndex = timeIndex + 0.5;
-    }
+  //   let timeIndex = 0;
+  //   if (startTime.slice(-2) === "pm") {
+  //     timeIndex = timeIndex + 12;
+  //   }
+  //   let hour = parseInt(startTime.slice(0, 2));
+  //   if (hour != "12") {
+  //     timeIndex = timeIndex + hour;
+  //   }
+  //   if (startTime.split(":")[1].slice(0, 1) == "3") {
+  //     timeIndex = timeIndex + 0.5;
+  //   }
 
-    let eventData = {
-      // title: Meditation or music,
-      // description: Recommend activity: Meditation or music,
-      label: red,
-      startTime: "10:00pm",
-      endTime: "10:30pm",
-      hour: "10:00pm",
-      month: dayjsDate.month() + 1,
-      year: dayjsDate.year(),
-      day: dayjsDate.date(),
-      date: dayjsDate.format("DD MMM YYYY"),
-      id: now.getTime(),
-      timeIndex: timeIndex,
-    };
-  }
+  //   let eventData = {
+  //     // title: Meditation or music,
+  //     // description: Recommend activity: Meditation or music,
+  //     label: red,
+  //     startTime: "10:00pm",
+  //     endTime: "10:30pm",
+  //     hour: "10:00pm",
+  //     month: dayjsDate.month() + 1,
+  //     year: dayjsDate.year(),
+  //     day: dayjsDate.date(),
+  //     date: dayjsDate.format("DD MMM YYYY"),
+  //     id: now.getTime(),
+  //     timeIndex: timeIndex,
+  //   };
+  // }
 
   async function addRecActivites(data) {
     await updateDoc(doc(db, "events", userId), {
