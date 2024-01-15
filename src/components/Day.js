@@ -139,7 +139,7 @@ export default function Day({ day, rowIdx }) {
             >
               {day.format("DD")}
             </p>
-            {day.format("DD") == "14" && (
+            {/* {day.format("DD") == "14" && (
               <a
                 onClick={(e) => e.stopPropagation()}
                 href="https://docs.google.com/forms/u/0/d/e/1FAIpQLScOxbF_Nps-GR6oQDdIJ71YYl10uB8Qh8kxVeSiZe1EqQzixg/formResponse"
@@ -150,7 +150,7 @@ export default function Day({ day, rowIdx }) {
                   sx={{ color: "#FF3333" }}
                 ></QuizIcon>
               </a>
-            )}
+            )} */}
           </div>
         </header>
         <div className="flex-1 cursor-pointer">
