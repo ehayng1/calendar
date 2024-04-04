@@ -77,12 +77,14 @@ export async function incrementCounters(grade, sex, type, value) {
 // finish implementing this
 export async function incrementActivityHours(hour, title) {
   const docRef = doc(db, "stats", "hoursofEachActivity");
-  await setDoc(docRef, {
+  // call getDoc
+  // check if title exists
+  await updateDoc(docRef, {
     [title]: increment(hour),
   });
 }
 
-export async function generateRecEvents(act1, act2) {
+export async function generateRecEvents(other, freeTime) {
   // const activities = ["Meditation", "Listening to Music", "Reading a Book"];
   const actList = [
     "Sleep",
@@ -93,12 +95,38 @@ export async function generateRecEvents(act1, act2) {
     "Music",
   ];
 
-  // filters act1 and act2 from the actList
-  let newActList = actList.filter((e) => e !== act1 || e !== act2);
-  let act3 =
-    newActList[Math.floor(Math.random() * newActList.length)];
+  // const activities = [act1, act2, act3, act4];
+  let activities;
+  let act4;
+  let freeTimeList = Object.keys(freeTime);
+  if (freeTimeList.includes("sleep")) {
+    let i = freeTimeList.indexOf("sleep");
+    freeTimeList[i] = "Sleep";
+  }
+  if (freeTimeList.includes("music")) {
+    let i = freeTimeList.indexOf("music");
+    freeTimeList[i] = "Listening to Music";
+  }
+  if (freeTimeList.includes("talk")) {
+    let i = freeTimeList.indexOf("talk");
+    freeTimeList[i] = "Talking with your friends";
+  }
+  if (freeTimeList.includes("read")) {
+    let i = freeTimeList.indexOf("read");
+    freeTimeList[i] = "Reading a Book";
+  }
+  if (other) {
+    let act4 = [other];
+    activities = freeTimeList.concat(act4);
+  } else {
+    activities = freeTimeList;
+  }
 
-  const activities = [act1, act2, act3];
+  // filters act1 and act2 from the actList
+  // let newActList = actList.filter((e) => e !== act1 || e !== act2);
+  // let act3 =
+  //   newActList[Math.floor(Math.random() * newActList.length)];
+
   const daysOfWeek = ["Tuesday", "Thursday", "Saturday"];
   const userId = await getUserId();
 
@@ -107,17 +135,18 @@ export async function generateRecEvents(act1, act2) {
   sex = data.sex;
   grade = data.grade;
 
+  console.log("Activities: ", activities);
   // Repeat for 3 cycles
   for (let i = 0; i < 3; i++) {
-    // Repeat for 3 activities
-    for (let k = 0; k < 3; k++) {
+    // Repeat for 4 activities
+    for (let k = 0; k < 4; k++) {
       for (let j = 0; j < 3; j++) {
         // Repeat for each activity
         const now = dayjs();
         let dayDiff = now.day() - 2;
         // const dayOfWeek = daysOfWeek[j];
         const startOfWeek = now
-          .add(j * 2 + k * 7 + i * 21, "day")
+          .add(j * 2 + k * 7 + i * 28, "day")
           .subtract(dayDiff, "day");
 
         // console.log(startOfWeek.date());

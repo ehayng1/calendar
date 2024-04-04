@@ -85,6 +85,8 @@ export function SignUp() {
   const [act2, setAct2] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [numOfAct, setNumOfAct] = useState(0);
+  // const [isOther, setIsOther] = useState(freeTime.other != "");
   const navigate = useNavigate();
 
   // function generateActivities() {
@@ -125,9 +127,27 @@ export function SignUp() {
     });
   }
 
+  function filterObject(obj) {
+    const filtered = {};
+    for (const key in obj) {
+      if (obj[key] === true) {
+        filtered[key] = obj[key];
+      }
+    }
+    return filtered;
+  }
+
   const signUpUser = () => {
-    if (act1 == "" || act2 == "") {
-      alert("Please choose your hobbies and activities.");
+    let isOther = freeTime.other != "";
+    let numOther = isOther ? 1 : 0;
+    let total = numOfAct + numOther;
+    console.log(total);
+    if (total != 4) {
+      alert("Please choose 4 activities.");
+      return;
+    }
+    if (values.stressedPeriod == "") {
+      alert("Please answer all the surveys.");
       return;
     }
     if (values.email == "") {
@@ -189,7 +209,26 @@ export function SignUp() {
         }
 
         await setDoc(doc(db, "events", uniqueId), {});
-        await generateRecEvents(act1, act2);
+
+        let isOther = freeTime.other != "";
+        let numOther = isOther ? 1 : 0;
+        let total = numOfAct + numOther;
+        console.log(total);
+
+        // if 4개 전부 선택
+        // 4개만 고르기
+        const filteredFreeTime = filterObject(freeTime);
+        if (total == 4) {
+          await generateRecEvents(freeTime.other, filteredFreeTime);
+        }
+        // less than 4개 선택
+        // 그대로 액티비티 가기
+        // console.log(numOfAct);
+        else {
+          await generateRecEvents(freeTime.other, filteredFreeTime);
+        }
+
+        // await generateRecEvents(act1, act2, act3, act4);
         await setDoc(doc(db, "label", uniqueId), {
           blue: 0,
           grey: 0,
@@ -395,7 +434,10 @@ export function SignUp() {
                 autoComplete="confirmPassword"
               />
               <Box sx={{ mt: 3 }}>
-                <h1>What do you enjoy during your free time?</h1>
+                <h1>
+                  What do you enjoy during your free time? (Please
+                  select 4 options)
+                </h1>
               </Box>
               <FormGroup sx={{ mt: 0 }}>
                 <FormControlLabel
@@ -403,12 +445,15 @@ export function SignUp() {
                     <Checkbox
                       checked={freeTime.music}
                       onChange={() => {
+                        if (!freeTime.music) {
+                          setNumOfAct(numOfAct + 1);
+                        } else {
+                          setNumOfAct(numOfAct - 1);
+                        }
                         setAct1("Listening to Music");
                         setFreeTime({
-                          // ...freeTime,
-                          ...baseFreeTime,
-                          other: "",
-                          music: !freeTime.music,
+                          ...freeTime,
+                          music: !freeTime.music, // update music
                         });
                       }}
                     />
@@ -421,10 +466,15 @@ export function SignUp() {
                     <Checkbox
                       checked={freeTime.sleep}
                       onChange={() => {
+                        if (!freeTime.sleep) {
+                          setNumOfAct(numOfAct + 1);
+                        } else {
+                          setNumOfAct(numOfAct - 1);
+                        }
                         setAct1("Sleep");
                         setFreeTime({
-                          // ...freeTime,
-                          ...baseFreeTime,
+                          ...freeTime,
+                          // ...baseFreeTime,
                           sleep: !freeTime.sleep,
                         });
                       }}
@@ -437,10 +487,15 @@ export function SignUp() {
                     <Checkbox
                       checked={freeTime.talk}
                       onChange={() => {
+                        if (!freeTime.talk) {
+                          setNumOfAct(numOfAct + 1);
+                        } else {
+                          setNumOfAct(numOfAct - 1);
+                        }
                         setAct1("Talking with your friends");
                         setFreeTime({
-                          // ...freeTime,
-                          ...baseFreeTime,
+                          ...freeTime,
+                          // ...baseFreeTime,
                           talk: !freeTime.talk,
                         });
                       }}
@@ -453,10 +508,15 @@ export function SignUp() {
                     <Checkbox
                       checked={freeTime.read}
                       onChange={() => {
+                        if (!freeTime.read) {
+                          setNumOfAct(numOfAct + 1);
+                        } else {
+                          setNumOfAct(numOfAct - 1);
+                        }
                         setAct1("Reading a book");
                         setFreeTime({
-                          // ...freeTime,
-                          ...baseFreeTime,
+                          ...freeTime,
+                          // ...baseFreeTime,
                           read: !freeTime.read,
                         });
                       }}
@@ -471,14 +531,29 @@ export function SignUp() {
                     alignItems: "center",
                   }}
                 >
-                  <Typography>Other: </Typography>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={freeTime.other != ""}
+                        onChange={() => {
+                          setAct1("Reading a book");
+                          setFreeTime({
+                            ...freeTime,
+                            // ...baseFreeTime,
+                            other: "",
+                          });
+                        }}
+                      />
+                    }
+                    label="Other"
+                  />
                   <TextField
                     value={freeTime.other}
                     onChange={(e) => {
                       setAct1(e.target.value);
                       setFreeTime({
-                        // ...freeTime,
-                        ...baseFreeTime,
+                        ...freeTime,
+                        // ...baseFreeTime,
                         other: e.target.value,
                       });
                     }}
@@ -488,7 +563,7 @@ export function SignUp() {
                   />
                 </Box>
               </FormGroup>
-
+              {/* 
               <Box sx={{ mt: 3 }}>
                 <h1>Hobbies especially for stress relief?</h1>
               </Box>
@@ -549,7 +624,23 @@ export function SignUp() {
                     alignItems: "center",
                   }}
                 >
-                  <Typography>Other: </Typography>
+                  <FormControlLabel
+                    // required
+                    control={
+                      <Checkbox
+                      // checked={hobbies.sleep}
+                      // onChange={() => {
+                      //   setAct2("Sleep");
+                      //   setHobbies({
+                      //     // ...hobbies,
+                      //     ...baseHobby,
+                      //     sleep: !hobbies.sleep,
+                      //   });
+                      // }}
+                      />
+                    }
+                    label="Other"
+                  />
                   <TextField
                     value={hobbies.other}
                     onChange={(e) => {
@@ -565,7 +656,7 @@ export function SignUp() {
                     variant="standard"
                   />
                 </Box>
-              </FormGroup>
+              </FormGroup> */}
               {/* <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
