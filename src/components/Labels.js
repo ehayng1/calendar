@@ -81,8 +81,8 @@ export default function Labels() {
 
   return (
     <React.Fragment>
-      <div className=" mt-10 mb-5">
-        <div className="flex flex-col justify-start content-start flex-nowrap">
+      <div className=" mt-5 mb-5">
+        <div className="flex flex-col justify-start content-start flex-nowrap bg-white rounded-lg p-5">
           <div className="flex items-center">
             <p className="text-gray-500 font-bold flex-1">Label</p>
             <div

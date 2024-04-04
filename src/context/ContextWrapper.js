@@ -38,7 +38,22 @@ export default function ContextWrapper(props) {
   const [isDayMode, setIsDayMode] = useState(false);
   const [showDashBoard, setShowDashBoard] = useState(false);
   const [userId, setUserId] = useState("");
-  const [dayModeEvents, setDayModeEvents] = useState("");
+  const [dayModeEvents, setDayModeEvents] = useState([
+    {
+      month: 1,
+      hour: "9:00 PM",
+      description: "Recommended Event for today!",
+      endTime: "10:00 PM",
+      date: "18 Jan 2024",
+      id: 1705628356523,
+      title: "Meditation",
+      day: 18,
+      year: 2024,
+      startTime: "9:00 PM",
+      label: "indigo",
+      timeIndex: 10,
+    },
+  ]);
   const [labelList, setLabelList] = useState({
     indigo: true,
     red: true,

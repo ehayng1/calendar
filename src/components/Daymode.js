@@ -20,11 +20,9 @@ export function Daymode() {
     // Convert start and end times to 24-hour format
     const startTime = parseTimeTo24HourFormat(start);
     const endTime = parseTimeTo24HourFormat(end);
-    // console.log("Start: ", startTime);
-    // console.log("End: ", endTime);
-    // console.log("Hour: ", hour);
 
     // Check if the hour is within or equal to the range
+
     return hour >= startTime && hour <= endTime;
   }
 
@@ -96,11 +94,11 @@ export function Daymode() {
       </div>
     ));
   };
-  console.log(daySelected);
 
   useEffect(() => {
     console.log("getting events...");
-    let day = daySelected;
+    let day = daySelected ? daySelected : dayjs();
+
     const getEvents = async () => {
       // const docRef = doc(db, "events", "EyepSY8B48R8cqeWozZs(USER1)");
       const tempId = await getUserId();
@@ -154,6 +152,7 @@ export function Daymode() {
         // setActiveEvents(arr.length);
 
         // Array of events
+        console.log(sorted);
         setDayModeEvents(sorted);
       } else {
         console.log("No such document!");
@@ -162,7 +161,6 @@ export function Daymode() {
     getEvents();
   }, [daySelected]);
 
-  console.log(dayModeEvents);
   return (
     <>
       <div className="block border-t-2 border-gray-200 w-full ">

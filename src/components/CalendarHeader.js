@@ -23,6 +23,7 @@ import Divider from "@mui/material/Divider";
 import { useNavigate, Outlet } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { generateRecEvents } from "../utils/firebase";
 
 const ProfileMenu = styled(Paper)(() => ({
   square: false,
@@ -37,8 +38,9 @@ export default function CalendarHeader({ isAdmin, isLoggedIn }) {
     refresh,
     setRefresh,
     setShowDashBoard,
+    setShowEventModal,
     isDayMode,
-    setIsDayMode,
+
     setDaySelected,
   } = useContext(GlobalContext);
   function handlePrevMonth() {
@@ -116,6 +118,7 @@ export default function CalendarHeader({ isAdmin, isLoggedIn }) {
           onClick={() => {
             navigate("/");
             setShowDashBoard(false);
+
             handleMenuClose();
           }}
         >
@@ -171,10 +174,10 @@ export default function CalendarHeader({ isAdmin, isLoggedIn }) {
     </ProfileMenu>
   );
   return (
-    <header className="pl-4 py-2 flex items-center border-b border-gray-300 ">
+    <header className="pl-4 py-2 flex items-center border-b border-gray-100 py-1 ">
       <img src={logo} alt="calendar" className="mr-12 w-12 h-12 ml-8" />
       {/* <h1 className="mr-10 text-xl text-gray-500 fond-bold">Calendar</h1> */}
-      <button
+      {/* <button
         onClick={handleReset}
         className="border rounded py-2 px-4 mr-5 ml-12"
       >
@@ -190,27 +193,12 @@ export default function CalendarHeader({ isAdmin, isLoggedIn }) {
           chevron_right
         </span>
       </button>
+
       <h2 className="ml-4 text-xl text-gray-500 font-bold flex-1">
         {dayjs(new Date(dayjs().year(), monthIndex)).format("MMMM YYYY")}
-      </h2>
-      {
-        isDayMode && (
-          <button
-            onClick={() => setIsDayMode(false)}
-            className="border rounded py-2 px-4 mr-5"
-          >
-            Month Mode
-          </button>
-        )
-        // : (
-        //   <button
-        //     onClick={() => setIsDayMode(true)}
-        //     className="border rounded py-2 px-4 mr-5"
-        //   >
-        //     Day Mode
-        //   </button>
-        // )
-      }
+      </h2> */}
+      <div className="flex-1"></div>
+
       <Box sx={{ display: { xs: "none", md: "flex" }, marginRight: "-6rem" }}>
         <IconButton
           size="large"

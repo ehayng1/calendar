@@ -29,7 +29,7 @@ export default function SmallCalendar() {
     const currDay = day.format(format);
     const slcDay = daySelected && daySelected.format(format);
     if (nowDay === currDay) {
-      return "bg-blue-500 rounded-full text-white";
+      return "bg-blue-600 rounded-full text-white";
     } else if (currDay === slcDay) {
       return "bg-blue-100 rounded-full text-blue-600 font-bold";
     } else {
@@ -37,8 +37,8 @@ export default function SmallCalendar() {
     }
   }
   return (
-    <div className="mt-9">
-      <header className="flex justify-between">
+    <div className="mt-5 bg-white rounded-lg p-5">
+      <header className="flex justify-between flex-nowrap">
         <p className="text-gray-500 font-bold">
           {dayjs(new Date(dayjs().year(), currentMonthIdx)).format("MMMM YYYY")}
         </p>

@@ -168,7 +168,7 @@ function Copyright(props) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://github.com/ehayng1/">
-        Calendar
+        SRP
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}

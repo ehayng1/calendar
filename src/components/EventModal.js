@@ -24,13 +24,11 @@ export default function EventModal() {
   const {
     setShowEventModal,
     daySelected,
-    dispatchCalEvent,
     selectedEvent,
     timeSelectedFormatted,
     setRefresh,
     refresh,
     userId,
-    showSurveyModal,
     setShowSurveyModal,
     setDayModeEvents,
     dayModeEvents,
@@ -142,11 +140,12 @@ export default function EventModal() {
         sex = data.sex;
         grade = data.grade;
 
-        await incrementCounters(grade, sex, "Other");
+        await incrementCounters(grade, sex, "Other", 1);
         console.log("incrementing number of events");
         await incrementNumberofEvents(
           "Other",
-          daySelected.format("DD MMM YYYY")
+          daySelected.format("DD MMM YYYY"),
+          1
         );
       }
 
@@ -158,7 +157,6 @@ export default function EventModal() {
       setRefresh(!refresh);
     }
   }
-  console.log(selectedLabel);
 
   async function handleDelete() {
     const docRef = doc(db, "events", userId);
@@ -316,7 +314,7 @@ export default function EventModal() {
           </div>
         </div>
         <footer className="flex border-t p-3 mt-5">
-          <a
+          {/* <a
             className="bg-blue-500 hover:bg-blue-600 px-6 py-2 mr-2 rounded text-white "
             href="https://docs.google.com/forms/d/e/1FAIpQLSe7XloCD6gm4N1EeIColoyNwOXzxS1rQ22M1CX1OpX8u8Ql9Q/formResponse?pli=1"
             target="_blank"
@@ -330,7 +328,19 @@ export default function EventModal() {
             className="bg-blue-500 hover:bg-blue-600 px-6 py-2 mr-2 rounded text-white "
           >
             Post Survey
-          </a>
+          </a> */}
+          {/* {console.log(selectedEvent)} */}
+          {selectedEvent && selectedEvent.recommended && (
+            <button
+              onClick={() => {
+                setShowEventModal(false);
+                setShowSurveyModal(true);
+              }}
+              className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded text-white"
+            >
+              Survey
+            </button>
+          )}
           {/* <button
             onClick={() => {
               setShowEventModal(false);

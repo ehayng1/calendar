@@ -1,35 +1,34 @@
-import * as React from "react";
-import { useState, useContext, useEffect } from "react";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
+import CssBaseline from "@mui/material/CssBaseline";
 import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import Grid from "@mui/material/Grid";
+import InputLabel from "@mui/material/InputLabel";
+import Link from "@mui/material/Link";
+import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import dayjs from "dayjs";
-import GlobalContext from "../context/GlobalContext";
-
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 // FIREBASE IMPORTS
 import {
-  getAuth,
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
+  getAuth,
 } from "firebase/auth";
-import { setDoc, doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
+import * as React from "react";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import GlobalContext from "../context/GlobalContext";
 import { db } from "../firebase";
-import { getUserId } from "../utils/firebase";
+import { generateRecEvents, getUserId } from "../utils/firebase";
+
 // import { getUserId } from "../utils/Firebase";
 
 const auth = getAuth();
@@ -47,7 +46,36 @@ export function SignUp() {
     password: "",
     confirmPassword: "",
   });
+  const baseFreeTime = {
+    music: false,
+    sleep: false,
+    talk: false,
+    read: false,
+    other: "",
+  };
+  const baseHobby = {
+    sports: false,
+    sleep: false,
+    music: false,
+    other: "",
+  };
+  const [freeTime, setFreeTime] = useState({
+    music: false,
+    sleep: false,
+    talk: false,
+    read: false,
+    other: "",
+  });
+  const [hobbies, setHobbies] = useState({
+    sports: false,
+    sleep: false,
+    music: false,
+    other: "",
+  });
+  const [act1, setAct1] = useState("");
+  const [act2, setAct2] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   // function generateActivities() {
@@ -89,6 +117,10 @@ export function SignUp() {
   }
 
   const signUpUser = () => {
+    if (act1 == "" || act2 == "") {
+      alert("Please choose your hobbies and activities.");
+      return;
+    }
     if (values.email == "") {
       //  setEmailError("Please enter an email.");
       //  alert(emailError);
@@ -116,8 +148,13 @@ export function SignUp() {
       return;
     }
 
-    createUserWithEmailAndPassword(auth, values.email, values.password)
+    createUserWithEmailAndPassword(
+      auth,
+      values.email,
+      values.password
+    )
       .then(async (userCredential) => {
+        setIsLoading(true);
         console.log("The user account is created.");
         const id = await getUserId();
         const uniqueId = id;
@@ -126,13 +163,18 @@ export function SignUp() {
           email: values.email,
           grade: values.grade,
           sex: values.sex,
+          ...freeTime,
+          ...hobbies,
         });
+
         await setDoc(doc(db, "events", uniqueId), {});
+        await generateRecEvents(act1, act2);
         await setDoc(doc(db, "label", uniqueId), {
           blue: 0,
           grey: 0,
           green: 0,
-          indigo: 0,
+          // 27 bc of the generateRecEvents
+          indigo: 27,
           purple: 0,
           red: 0,
         });
@@ -145,40 +187,24 @@ export function SignUp() {
           purple: "purple",
           red: "red",
         });
-        navigate("/signup");
+        setIsLoading(false);
+        navigate("/");
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
         if (errorCode == "auth/email-already-in-use") {
-          // Toast.show({
-          //   type: "error",
-          //   text1: "Email is already used.",
-          // });
           alert("Email is already used.");
         } else if (errorCode == "auth/invalid-email") {
-          // Toast.show({
-          //   type: "error",
-          //   text1: "Email format is not correct.",
-          // });
           alert("Email format is not correct.");
         } else if (errorCode == "auth/invalid-email") {
-          // Toast.show({
-          //   type: "error",
-          //   text1: "Email format is not correct.",
-          // });
           alert("Email format is not correct.");
         } else if (errorCode == "auth/weak-password") {
-          // Toast.show({
-          //   type: "error",
-          //   text1: "Password is too weak.",
-          // });
           alert("Password is too weak.");
         }
         // setLoading(false);
       });
   };
-  console.log(values);
 
   const handleChange = (e) =>
     setValues({ ...values, [e.target.name]: e.target.value });
@@ -190,24 +216,20 @@ export function SignUp() {
       //   setValues({ ...values, isAdmin: true });
       await signUpUser(values);
       // alert("Registration successful. Please login.");
-      navigate("/signin");
     } catch (error) {
       setError(error.message);
       alert(error.message);
     }
   };
 
-  // const handleSubmit = (event) => {
-  //   event.preventDefault();
-  //   const data = new FormData(event.currentTarget);
-  //   console.log({
-  //     email: data.get("email"),
-  //     password: data.get("password"),
-  //   });
-  // };
-
   return (
-    <div style={{ display: "flex", flexDirection: "row", margin: "0 auto" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        margin: "0 auto",
+      }}
+    >
       <ThemeProvider theme={theme}>
         <Container component="main" maxWidth="xs">
           <CssBaseline />
@@ -243,7 +265,9 @@ export function SignUp() {
                 autoFocus
               />
               <FormControl sx={{ mt: 2 }} fullWidth>
-                <InputLabel id="demo-simple-select-label">Grade</InputLabel>
+                <InputLabel id="demo-simple-select-label">
+                  Grade
+                </InputLabel>
                 <Select
                   sx={{ textAlign: "left" }}
                   labelId="demo-simple-select-label"
@@ -253,13 +277,16 @@ export function SignUp() {
                   name="grade"
                   onChange={handleChange}
                 >
+                  <MenuItem value={10}>Grade 9</MenuItem>
                   <MenuItem value={10}>Grade 10</MenuItem>
                   <MenuItem value={11}>Grade 11</MenuItem>
                   <MenuItem value={12}>Grade 12</MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ mt: 2 }} fullWidth>
-                <InputLabel id="demo-simple-select-label">Gender</InputLabel>
+                <InputLabel id="demo-simple-select-label">
+                  Gender
+                </InputLabel>
                 <Select
                   sx={{ textAlign: "left" }}
                   labelId="demo-simple-select-label"
@@ -273,6 +300,43 @@ export function SignUp() {
                   <MenuItem value={"F"}>Female</MenuItem>
                 </Select>
               </FormControl>
+              {/* <FormControl sx={{ mt: 2 }} fullWidth>
+                <InputLabel id="demo-simple-select-label">
+                  Free Time
+                </InputLabel>
+                <Select
+                  sx={{ textAlign: "left" }}
+                  labelId="demo-simple-select-label"
+                  id="Sex"
+                  value={values.sex}
+                  label="Sex"
+                  name="sex"
+                  onChange={handleChange}
+                >
+                  <MenuItem value={"M"}>Listening to Music</MenuItem>
+                  <MenuItem value={"F"}>Sleep</MenuItem>
+                  <MenuItem value={"F"}>Talking with your friends</MenuItem>
+                  <MenuItem value={"F"}>Reading a book</MenuItem>
+                </Select>
+              </FormControl> */}
+
+              {/* <FormControl sx={{ mt: 2 }} fullWidth>
+                <InputLabel id="demo-simple-select-label">
+                  Gender
+                </InputLabel>
+                <Select
+                  sx={{ textAlign: "left" }}
+                  labelId="demo-simple-select-label"
+                  id="Sex"
+                  value={values.sex}
+                  label="Sex"
+                  name="sex"
+                  onChange={handleChange}
+                >
+                  <MenuItem value={"M"}>Male</MenuItem>
+                  <MenuItem value={"F"}>Female</MenuItem>
+                </Select>
+              </FormControl> */}
               <TextField
                 value={values.email}
                 onChange={handleChange}
@@ -309,10 +373,214 @@ export function SignUp() {
                 id="confirmPassword"
                 autoComplete="confirmPassword"
               />
+              <Box sx={{ mt: 3 }}>
+                <h1>What do you enjoy during your free time?</h1>
+              </Box>
+              <FormGroup sx={{ mt: 0 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={freeTime.music}
+                      onChange={() => {
+                        setAct1("Listening to Music");
+                        setFreeTime({
+                          // ...freeTime,
+                          ...baseFreeTime,
+                          other: "",
+                          music: !freeTime.music,
+                        });
+                      }}
+                    />
+                  }
+                  label="Listening to Music"
+                />
+                <FormControlLabel
+                  // required
+                  control={
+                    <Checkbox
+                      checked={freeTime.sleep}
+                      onChange={() => {
+                        setAct1("Sleep");
+                        setFreeTime({
+                          // ...freeTime,
+                          ...baseFreeTime,
+                          sleep: !freeTime.sleep,
+                        });
+                      }}
+                    />
+                  }
+                  label="Sleep"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={freeTime.talk}
+                      onChange={() => {
+                        setAct1("Talking with your friends");
+                        setFreeTime({
+                          // ...freeTime,
+                          ...baseFreeTime,
+                          talk: !freeTime.talk,
+                        });
+                      }}
+                    />
+                  }
+                  label="Talking with your friends"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={freeTime.read}
+                      onChange={() => {
+                        setAct1("Reading a book");
+                        setFreeTime({
+                          // ...freeTime,
+                          ...baseFreeTime,
+                          read: !freeTime.read,
+                        });
+                      }}
+                    />
+                  }
+                  label="Reading a book"
+                />
+                <Box
+                  style={{
+                    display: "flex",
+                    gap: "1rem",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography>Other: </Typography>
+                  <TextField
+                    value={freeTime.other}
+                    onChange={(e) => {
+                      setAct1(e.target.value);
+                      setFreeTime({
+                        // ...freeTime,
+                        ...baseFreeTime,
+                        other: e.target.value,
+                      });
+                    }}
+                    id="standard-basic"
+                    label=""
+                    variant="standard"
+                  />
+                </Box>
+              </FormGroup>
+
+              <Box sx={{ mt: 3 }}>
+                <h1>Hobbies especially for stress relief?</h1>
+              </Box>
+              <FormGroup sx={{ mt: 0 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={hobbies.sports}
+                      onChange={() => {
+                        setAct2("Sports/Exercise");
+                        setHobbies({
+                          // ...hobbies,
+                          ...baseHobby,
+                          sports: !hobbies.sports,
+                        });
+                      }}
+                    />
+                  }
+                  label="Sports/Exercise"
+                />
+                <FormControlLabel
+                  // required
+                  control={
+                    <Checkbox
+                      checked={hobbies.sleep}
+                      onChange={() => {
+                        setAct2("Sleep");
+                        setHobbies({
+                          // ...hobbies,
+                          ...baseHobby,
+                          sleep: !hobbies.sleep,
+                        });
+                      }}
+                    />
+                  }
+                  label="Sleep"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={hobbies.music}
+                      onChange={() => {
+                        setAct2("Music");
+                        setHobbies({
+                          // ...hobbies,
+                          ...baseHobby,
+                          music: !hobbies.music,
+                        });
+                      }}
+                    />
+                  }
+                  label="Music"
+                />
+                <Box
+                  style={{
+                    display: "flex",
+                    gap: "1rem",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography>Other: </Typography>
+                  <TextField
+                    value={hobbies.other}
+                    onChange={(e) => {
+                      setAct2(e.target.value);
+                      setHobbies({
+                        // ...hobbies,
+                        ...baseHobby,
+                        other: e.target.value,
+                      });
+                    }}
+                    id="standard-basic"
+                    label=""
+                    variant="standard"
+                  />
+                </Box>
+              </FormGroup>
               {/* <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             /> */}
+
+              <Box
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  display: "flex",
+                  flexDirection: "center",
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Please take this
+                </Typography>
+                <Typography variant="title" color="inherit" noWrap>
+                  &nbsp;
+                </Typography>
+                <a
+                  target={"_blank"}
+                  // href="https://docs.google.com/forms/d/1rtdk-kwJ_lNtxg4W-ocJtjxoncXx3mdZenIEqtwKwWY/edit"
+                  href="https://docs.google.com/forms/d/e/1FAIpQLScwPKUOCbS3KBG1W1J4Qys_ZKvlVpusWszPzR_-Cc_WUG84NA/viewform?pli=1"
+                  // href="https://docs.google.com/forms/d/e/1FAIpQLSdkiU18wzOpEnToITAw0-PPUaqygYuNT70Gc8Dhykn40KZRjQ/viewform?usp=send_form"
+                >
+                  <Typography variant="body2">
+                    <Link>survey</Link>
+                  </Typography>
+                </a>
+                <Typography variant="title" color="inherit" noWrap>
+                  &nbsp;
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  for accurate recommendations.
+                </Typography>
+              </Box>
 
               <Box sx={{ mt: 2, mb: 2 }}>
                 <Typography
@@ -320,8 +588,8 @@ export function SignUp() {
                   color="text.secondary"
                   // align="center"
                 >
-                  Please make sure that you sign up with the same email address
-                  with that of the survey.
+                  Please make sure that you sign up with the same
+                  email address with that of the survey.
                 </Typography>
               </Box>
               <Button
@@ -330,7 +598,8 @@ export function SignUp() {
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
               >
-                Sign up
+                {/* Sign up */}
+                {isLoading ? "Creating your profile..." : "Sign up"}
               </Button>
 
               <Grid container>

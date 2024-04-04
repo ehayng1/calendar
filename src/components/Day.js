@@ -26,6 +26,7 @@ export default function Day({ day, rowIdx }) {
     monthIndex,
     userId,
     setIsDayMode,
+    dayModeEvents,
     isDayMode,
     setDayModeEvents,
     closetEvent,
@@ -115,7 +116,7 @@ export default function Day({ day, rowIdx }) {
           <More data={events} day={day}></More>
         )}
       <div
-        className="border border-gray-200 flex flex-col"
+        className="border border-gray-200 flex flex-col "
         onClick={() => {
           setDaySelected(day);
           setShowEventModal(true);
@@ -127,6 +128,7 @@ export default function Day({ day, rowIdx }) {
               {day.format("ddd").toUpperCase()}
             </p>
           )}
+
           <div className="flex items-center">
             <p
               className={`text-sm p-1 mt-1 my text-center cursor-pointer  ${getCurrentDayClass()}`}

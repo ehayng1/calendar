@@ -12,10 +12,10 @@ import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { SignIn } from "./pages/SignIn";
 import { SignUp } from "./pages/SignUp";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-// import { Dashboard } from "./components/Dashboard";
 import Dashboard from "./Modernize/src/views/dashboard/Dashboard";
 import { Daymode } from "./components/Daymode";
 import SurveyModal from "./components/SurveyModal";
+import CreateEventButton from "./components/CreateEventButton";
 
 function Calendar() {
   const [currenMonth, setCurrentMonth] = useState(getMonth());
@@ -65,14 +65,18 @@ function Calendar() {
     <React.Fragment>
       {showEventModal && <EventModal />}
       {showSurveyModal && <SurveyModal />}
-
+      {!showDashBoard && <CreateEventButton></CreateEventButton>}
+      {/* bg-grey-400 */}
       <div className="h-screen flex flex-col">
         <CalendarHeader isAdmin={isAdmin} isLoggedIn={isLoggedIn} />
         {showDashBoard ? (
           <Dashboard />
         ) : (
-          <div className="flex flex-1">
-            <div className="">
+          <div
+            className="flex flex-1 bg-gray-200 pb-5"
+            style={{ backgroundColor: "#f6f7fb" }}
+          >
+            <div className="" style={{ minWidth: "20vw" }}>
               <Sidebar />
             </div>
             {isDayMode ? <Daymode></Daymode> : <Month month={currenMonth} />}
