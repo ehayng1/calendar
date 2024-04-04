@@ -8,10 +8,13 @@ import CssBaseline from "@mui/material/CssBaseline";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
+import FormLabel from "@mui/material/FormLabel";
 import Grid from "@mui/material/Grid";
 import InputLabel from "@mui/material/InputLabel";
 import Link from "@mui/material/Link";
 import MenuItem from "@mui/material/MenuItem";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import Select from "@mui/material/Select";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
@@ -21,7 +24,12 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
 } from "firebase/auth";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  increment,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import * as React from "react";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -45,6 +53,7 @@ export function SignUp() {
     email: "",
     password: "",
     confirmPassword: "",
+    stressedPeriod: "",
   });
   const baseFreeTime = {
     music: false,
@@ -166,6 +175,18 @@ export function SignUp() {
           ...freeTime,
           ...hobbies,
         });
+
+        // updates the stressPeriod statistics
+        const docRef = doc(db, "stats", "Jf8GaQwvyXMWk0Zn8dcR");
+        if (values.stressedPeriod == "Morning") {
+          await updateDoc(docRef, {
+            morning: increment(1),
+          });
+        } else {
+          await updateDoc(docRef, {
+            evening: increment(1),
+          });
+        }
 
         await setDoc(doc(db, "events", uniqueId), {});
         await generateRecEvents(act1, act2);
@@ -550,9 +571,52 @@ export function SignUp() {
               label="Remember me"
             /> */}
 
+              <FormControl sx={{ mt: 3 }}>
+                <FormLabel id="demo-radio-buttons-group-label">
+                  Are you stressed towards the morning or the evening?
+                </FormLabel>
+                <RadioGroup
+                  aria-labelledby="demo-radio-buttons-group-label"
+                  defaultValue="female"
+                  name="radio-buttons-group"
+                >
+                  <FormControlLabel
+                    value="Morning"
+                    control={
+                      <Radio
+                        checked={values.stressedPeriod === "Morning"}
+                        onChange={(e) =>
+                          setValues({
+                            ...values,
+                            stressedPeriod: e.target.value,
+                          })
+                        }
+                      />
+                    }
+                    label="Morning"
+                  />
+                  <FormControlLabel
+                    value="Evening"
+                    control={
+                      <Radio
+                        checked={values.stressedPeriod === "Evening"}
+                        // onChange={handleChange}
+                        onChange={(e) =>
+                          setValues({
+                            ...values,
+                            stressedPeriod: e.target.value,
+                          })
+                        }
+                      />
+                    }
+                    label="Evening"
+                  />
+                </RadioGroup>
+              </FormControl>
+
               <Box
                 sx={{
-                  mt: 3,
+                  mt: 4,
                   mb: 2,
                   display: "flex",
                   flexDirection: "center",
