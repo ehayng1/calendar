@@ -143,7 +143,7 @@ export function SignUp() {
     let total = numOfAct + numOther;
     console.log(total);
     if (total != 4) {
-      alert("Please choose 4 activities.");
+      alert("Please select 2.");
       return;
     }
     if (values.stressedPeriod == "") {
@@ -436,7 +436,7 @@ export function SignUp() {
               <Box sx={{ mt: 3 }}>
                 <h1>
                   What do you enjoy during your free time? (Please
-                  select 4 options)
+                  select 2)
                 </h1>
               </Box>
               <FormGroup sx={{ mt: 0 }}>
