@@ -142,7 +142,7 @@ export function SignUp() {
     let numOther = isOther ? 1 : 0;
     let total = numOfAct + numOther;
     console.log(total);
-    if (total != 4) {
+    if (total != 2) {
       alert("Please select 2.");
       return;
     }

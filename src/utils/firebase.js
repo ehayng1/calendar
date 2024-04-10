@@ -91,8 +91,6 @@ export async function generateRecEvents(other, freeTime) {
     "Listening to Music",
     "Reading a Book",
     "Talking with your friends",
-    "Sports/Exercise",
-    "Music",
   ];
 
   // const activities = [act1, act2, act3, act4];
@@ -102,18 +100,22 @@ export async function generateRecEvents(other, freeTime) {
   if (freeTimeList.includes("sleep")) {
     let i = freeTimeList.indexOf("sleep");
     freeTimeList[i] = "Sleep";
+    actList.splice(0, 0);
   }
   if (freeTimeList.includes("music")) {
     let i = freeTimeList.indexOf("music");
     freeTimeList[i] = "Listening to Music";
+    actList.splice(1, 1);
   }
   if (freeTimeList.includes("talk")) {
     let i = freeTimeList.indexOf("talk");
     freeTimeList[i] = "Talking with your friends";
+    actList.splice(3, 3);
   }
   if (freeTimeList.includes("read")) {
     let i = freeTimeList.indexOf("read");
     freeTimeList[i] = "Reading a Book";
+    actList.splice(2, 2);
   }
   if (other) {
     let act4 = [other];
@@ -121,6 +123,13 @@ export async function generateRecEvents(other, freeTime) {
   } else {
     activities = freeTimeList;
   }
+
+  // random
+  activities.push(
+    actList[Math.floor(Math.random() * actList.length)]
+  );
+
+  console.log("Activities: ", activities);
 
   // filters act1 and act2 from the actList
   // let newActList = actList.filter((e) => e !== act1 || e !== act2);
@@ -135,18 +144,17 @@ export async function generateRecEvents(other, freeTime) {
   sex = data.sex;
   grade = data.grade;
 
-  console.log("Activities: ", activities);
   // Repeat for 3 cycles
   for (let i = 0; i < 3; i++) {
     // Repeat for 4 activities
-    for (let k = 0; k < 4; k++) {
+    for (let k = 0; k < 3; k++) {
       for (let j = 0; j < 3; j++) {
         // Repeat for each activity
         const now = dayjs();
         let dayDiff = now.day() - 2;
         // const dayOfWeek = daysOfWeek[j];
         const startOfWeek = now
-          .add(j * 2 + k * 7 + i * 28, "day")
+          .add(j * 2 + k * 7 + i * 21, "day")
           .subtract(dayDiff, "day");
 
         // console.log(startOfWeek.date());
